@@ -1,0 +1,34 @@
+Testing Groq API...
+❌ Groq Error: BadRequestError: 400 The model `llama3-8b-8192` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.
+    at APIError.generate (file:///c:/Users/mohit/OneDrive/Desktop/ganeshwebdev/AI-Interview-Bot/server/node_modules/openai/error.mjs:41:20)
+    at OpenAI.makeStatusError (file:///c:/Users/mohit/OneDrive/Desktop/ganeshwebdev/AI-Interview-Bot/server/node_modules/openai/core.mjs:295:25)
+    at OpenAI.makeRequest (file:///c:/Users/mohit/OneDrive/Desktop/ganeshwebdev/AI-Interview-Bot/server/node_modules/openai/core.mjs:339:30)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async testGroq (file:///c:/Users/mohit/OneDrive/Desktop/ganeshwebdev/AI-Interview-Bot/server/test-groq.js:21:28) {
+  status: 400,
+  headers: {
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cache-control': 'private, max-age=0, no-store, no-cache, must-revalidate',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '9a377295a9f7b2b1-MAA',
+    connection: 'keep-alive',
+    'content-length': '275',
+    'content-type': 'application/json',
+    date: 'Mon, 24 Nov 2025 08:13:32 GMT',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=P.hCMs5XtDdVSjbdDZ0Z0yJURkPIhkZfWIfQHN0AJKY-1763972012.4298038-1.0.1.1-1K61wqDpek1ystsi.4LFLFfmf1gIJqAd33YZv4LRdpwuBYQhtr96AA3U56k6jN4EmDzfkmD62M6dTlmmxdXEteaYrMEE1GNw6OnhH.dv4IHjrs7J5SoYZWF3ILBDv.lM; HttpOnly; Secure; Path=/; Domain=groq.com; Expires=Mon, 24 Nov 2025 08:43:32 GMT',
+    vary: 'Origin',
+    via: '1.1 google',
+    'x-groq-region': 'bom',
+    'x-request-id': 'req_01katespddfjvb0xxmsbb3jwt8'
+  },
+  request_id: 'req_01katespddfjvb0xxmsbb3jwt8',
+  error: {
+    message: 'The model `llama3-8b-8192` has been decommissioned and is no longer supported. Please refer to https://console.groq.com/docs/deprecations for a recommendation on which model to use instead.',
+    type: 'invalid_request_error',
+    code: 'model_decommissioned'
+  },
+  code: 'model_decommissioned',
+  param: undefined,
+  type: 'invalid_request_error'
+}
