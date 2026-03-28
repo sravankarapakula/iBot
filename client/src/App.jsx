@@ -6,9 +6,9 @@ import { AnimatePresence } from "framer-motion";
 // ✅ IMPORTANT: Interview session page (where AI questions should appear)
 import InterviewSession from "./pages/InterviewSession.jsx";
 
-// Layouts & Components
 import MainLayout from "./layouts/MainLayout.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import PublicRoute from "./components/PublicRoute.jsx";
 import ChatBot from "./components/ChatBot.jsx";
 
 // Pages
@@ -38,8 +38,8 @@ export default function App() {
 
         {/* ✅ PUBLIC ROUTES */}
         <Route path="/home" element={<Home />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
 
         {/* 🔒 PROTECTED ROUTES */}
         <Route

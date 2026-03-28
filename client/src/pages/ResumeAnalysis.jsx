@@ -27,7 +27,7 @@ export default function ResumeAnalysis() {
   const [resumeText, setResumeText] = useState("");
 
   useEffect(() => {
-    const storedResume = localStorage.getItem("uploadedResumeText");
+    const storedResume = sessionStorage.getItem("uploadedResumeText");
     if (storedResume) {
       setResumeText(storedResume);
       analyzeResume(storedResume);
@@ -81,7 +81,7 @@ export default function ResumeAnalysis() {
         throw new Error("Unsupported file format");
       }
 
-      localStorage.setItem("uploadedResumeText", text);
+      sessionStorage.setItem("uploadedResumeText", text);
       setResumeText(text);
       analyzeResume(text);
     } catch (err) {

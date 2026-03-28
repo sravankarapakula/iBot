@@ -13,7 +13,7 @@ export default function Profile() {
   const [avatar, setAvatar] = useState("");
   const [analysisHistory, setAnalysisHistory] = useState([]);
 
-  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const storedUser = JSON.parse(sessionStorage.getItem("user"));
 
   const email = storedUser?.email;
   const name = storedUser?.name;

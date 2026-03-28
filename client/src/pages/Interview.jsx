@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { uploadResume, generateInterviewQuestions } from "../api/api";
+import { uploadResume, generateInterviewQuestions } from "../services/api";
 import { ArrowLeft, ArrowRightCircle } from "lucide-react";
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from "framer-motion";
-import roleInfo from "../data/roleInfo";
+import roleInfo from "../constants/roleInfo";
 
 export default function Interview() {
   const navigate = useNavigate();
@@ -55,23 +56,15 @@ export default function Interview() {
   };
 
   const handleGenerateQuestions = async () => {
-    if (!resumeText) return alert("Upload resume first!");
-
     try {
-      const difficulty =
-        roleData?.difficulty ||
-        (round === 1 ? "medium" : round === 2 ? "hard" : "easy");
-      const companyType = roleData?.category || "development";
+      const role = roleTitle.replace(/-/g, " ");
+      const result = await generateInterviewQuestions(role, round);
 
-      const result = await generateInterviewQuestions({
-        jobDescription,
-        resumeText,
-        round,
-        difficulty,
-        companyType,
-      });
+      const qList = typeof result.questions === "string"
+        ? result.questions.split("\n").filter((q) => q.trim() !== "")
+        : result.questions;
 
-      setQuestions(result.questions.split("\n").filter((q) => q.trim() !== ""));
+      setQuestions(qList);
     } catch (err) {
       alert("Error generating questions");
       console.error(err);

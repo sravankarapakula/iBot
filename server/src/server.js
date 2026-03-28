@@ -1,43 +1,38 @@
 import dotenv from "dotenv";
 dotenv.config();
+
 import express from "express";
 import cors from "cors";
-
 import mongoose from "mongoose";
 import OpenAI from "openai";
+
 import { connectDB } from "./config.js";
 
-// Routes
-import userRoutes from "./routes/userRoutes.js";
+// ROUTES
+import authRoutes from "./routes/auth.routes.js";   // ✅ NEW AUTH SYSTEM
 import interviewRoutes from "./routes/interviewRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import resumeRoutes from "./routes/resumeRoutes.js";
 
-
-
-// ✅ Connect Database
+// ✅ CONNECT DB
 connectDB();
 
 const app = express();
 
-// ✅ Middleware
+// ✅ MIDDLEWARE
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
-// ✅ CORS configuration
-const allowedOrigins = [
-  "http://localhost:5173", // Vite frontend
-  "https://ai-interview-bot.vercel.app" // Production frontend
-];
-
+// ✅ CORS
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow Postman / server-to-server requests
       if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
+      if (
+        origin.match(/^http:\/\/localhost:\d+$/) ||
+        origin === "https://ai-interview-bot.vercel.app"
+      ) {
         return callback(null, true);
       } else {
         return callback(new Error("CORS policy violation"), false);
@@ -48,13 +43,13 @@ app.use(
   })
 );
 
-// ✅ Initialize OpenAI Client
+// ✅ OPENAI (GROQ)
 export const openai = new OpenAI({
   apiKey: process.env.GROQ_API_KEY,
   baseURL: "https://api.groq.com/openai/v1",
 });
 
-// ================== AI CHAT ENDPOINT ==================
+// ================== AI CHAT ==================
 app.post("/api/chat", async (req, res) => {
   try {
     const { message } = req.body;
@@ -71,25 +66,24 @@ app.post("/api/chat", async (req, res) => {
       ],
     });
 
-    const reply = completion.choices[0]?.message?.content ||
+    const reply =
+      completion.choices[0]?.message?.content ||
       "Sorry, I couldn’t process that.";
 
-    return res.status(200).json({ reply });
+    res.status(200).json({ reply });
   } catch (error) {
     console.error("❌ Chat API Error:", error);
-    res.status(500).json({
-      error: "Failed to get AI response",
-    });
+    res.status(500).json({ error: "Failed to get AI response" });
   }
 });
 
 // ================== ROUTES ==================
-app.use("/api/user", userRoutes);
+app.use("/api/auth", authRoutes);        // ✅ NEW
 app.use("/api/interview", interviewRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/resume", resumeRoutes);
 
-// ================== DB TEST ROUTE ==================
+// ================== DB TEST ==================
 app.post("/api/testdb", async (req, res) => {
   try {
     const { name } = req.body;
@@ -112,12 +106,12 @@ app.post("/api/testdb", async (req, res) => {
   }
 });
 
-// ================== HEALTH CHECK ==================
+// ================== HEALTH ==================
 app.get("/", (req, res) => {
   res.send("✅ AI Interview Bot Backend is running successfully!");
 });
 
-// ================== GLOBAL ERROR HANDLER ==================
+// ================== GLOBAL ERROR ==================
 app.use((err, req, res, next) => {
   console.error("🔥 Global Error:", err);
   res.status(500).json({
@@ -126,7 +120,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ================== START SERVER ==================
+// ================== START ==================
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

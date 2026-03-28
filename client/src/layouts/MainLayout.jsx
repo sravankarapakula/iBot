@@ -25,7 +25,7 @@ export default function MainLayout() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
+    sessionStorage.clear();
     navigate("/login");
   };
 

@@ -1,28 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { Eye, EyeOff, X } from "lucide-react";
+import React, { useState } from "react";
+import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import Particles from "react-tsparticles";
-import { loadFull } from "tsparticles";
-import {
-  signInWithGoogle,
-  signInWithFacebook,
-  signInWithApple,
-} from "../firebase";
+import AnoAI from "../components/ui/animated-shader-background";
+import { loginUser } from "../services/api";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
-  // ✅ Auto redirect if already logged in
-  useEffect(() => {
-    if (localStorage.getItem("authToken")) {
-      navigate("/dashboard");
-    }
-  }, [navigate]);
 
   const validate = () => {
     const e = {};
@@ -33,153 +22,178 @@ export default function Login() {
     return Object.keys(e).length === 0;
   };
 
-  // ✅ NORMAL LOGIN
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
+    setLoading(true);
+    setErrors({});
+
     try {
-      const userData = {
-        name: email.split("@")[0],
-        email: email,
-        photo: ""
-      };
+      const data = await loginUser(email, password);
 
-      localStorage.setItem("authToken", "sample_token_123");
-      localStorage.setItem("user", JSON.stringify(userData)); 
+      sessionStorage.setItem("authToken", data.accessToken);
+      sessionStorage.setItem("refreshToken", data.refreshToken);
+      sessionStorage.setItem(
+        "user",
+        JSON.stringify({
+          _id: data.user._id,
+          username: data.user.username,
+          email: data.user.email,
+        })
+      );
 
-      navigate("/dashboard");
+      navigate("/dashboard", { replace: true });
     } catch (err) {
-      console.error("Login error:", err.message);
-      setErrors({ general: "Login failed. Please try again." });
-    }
-  };
-
-  // ✅ SOCIAL LOGIN (GOOGLE / FACEBOOK / APPLE)
-  const handleSocialLogin = async (type) => {
-    try {
-      let userCredential;
-
-      if (type === "Google") userCredential = await signInWithGoogle();
-      if (type === "Facebook") userCredential = await signInWithFacebook();
-      if (type === "Apple") userCredential = await signInWithApple();
-
-      const user = userCredential.user;
-
-      const userData = {
-        name: user.displayName,
-        email: user.email,
-        photo: user.photoURL
-      };
-
-      localStorage.setItem("authToken", `${type}_login_token`);
-      localStorage.setItem("user", JSON.stringify(userData)); 
-
-      navigate("/dashboard");
-    } catch (err) {
-      console.error("Social login error:", err.message);
+      setErrors({ general: err.message || "Login failed. Please try again." });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden px-4 bg-gradient-to-br from-teal-50 via-white to-cyan-50">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden px-4">
+      {/* Aurora Shader Background */}
+      <div className="fixed inset-0 z-0">
+        <AnoAI />
+      </div>
 
-      <Particles
-        id="tsparticles"
-        className="absolute inset-0 z-0"
-        init={async (engine) => await loadFull(engine)}
-        options={{
-          background: { color: "transparent" },
-          fpsLimit: 60,
-          particles: {
-            color: { value: "#14B8A6" },
-            links: { color: "#14B8A6", distance: 120, enable: true, opacity: 0.4 },
-            move: { enable: true, speed: 1 },
-            number: { value: 60, density: { enable: true, area: 800 } },
-            opacity: { value: 0.5 },
-            shape: { type: "circle" },
-            size: { value: { min: 1, max: 3 } },
-          },
-        }}
-      />
-
-      <header className="absolute top-0 left-0 w-full flex justify-between items-center px-6 py-4 z-10">
-        <h1 className="text-teal-700 font-bold text-2xl">Interview Companion</h1>
-        <button
-          onClick={() => navigate("/")}
-          className="text-teal-700 hover:text-teal-900 transition"
+      {/* Header */}
+      <header className="absolute top-0 left-0 w-full flex justify-between items-center px-6 md:px-12 py-5 z-20">
+        <Link to="/home" className="text-2xl font-bold tracking-wide text-white hover:text-blue-300 transition">
+          Interview Companion
+        </Link>
+        <Link
+          to="/home"
+          className="px-4 py-2 rounded border border-white/20 text-gray-300 hover:bg-white/10 hover:text-white transition text-sm"
         >
-          <X size={28} />
-        </button>
+          ← Back to Home
+        </Link>
       </header>
 
-      <div className="relative z-10 w-full max-w-4xl bg-white shadow-2xl rounded-2xl p-10 border border-blue-100 mt-16 grid grid-cols-1 md:grid-cols-2 gap-8">
+      {/* Login Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 30, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="relative z-10 w-full max-w-md mt-16"
+      >
+        <div className="bg-white/[0.06] backdrop-blur-xl rounded-2xl p-8 md:p-10 border border-white/[0.12] shadow-2xl shadow-blue-500/5">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-center mb-8"
+          >
+            <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
+              <Lock className="w-7 h-7 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-1">Welcome Back</h2>
+            <p className="text-gray-400 text-sm">Sign in to continue your journey</p>
+          </motion.div>
 
-        {/* LOGIN FORM */}
-        <motion.div initial={{ x: -40, opacity: 0 }} animate={{ x: 0, opacity: 1 }}>
-          <h2 className="text-3xl font-bold text-teal-700 mb-4">
-            Welcome Back
-          </h2>
+          {/* General Error */}
+          {errors.general && (
+            <motion.div
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-5 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-sm text-center"
+            >
+              {errors.general}
+            </motion.div>
+          )}
 
-          <form className="grid grid-cols-1 gap-5" onSubmit={handleSubmit}>
+          {/* Form */}
+          <form className="space-y-5" onSubmit={handleSubmit}>
+            {/* Email Field */}
             <div>
-              <label>Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border-2 border-black rounded-xl"
-              />
-              {errors.email && <p className="text-red-500">{errors.email}</p>}
+              <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                Email Address
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/[0.06] border border-white/[0.12] text-white placeholder-gray-500 focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 outline-none transition text-sm"
+                />
+              </div>
+              {errors.email && (
+                <p className="text-red-400 text-xs mt-1.5 ml-1">{errors.email}</p>
+              )}
             </div>
 
+            {/* Password Field */}
             <div>
-              <label>Password</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                Password
+              </label>
               <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-black rounded-xl"
+                  placeholder="Enter your password"
+                  className="w-full pl-10 pr-12 py-3 rounded-xl bg-white/[0.06] border border-white/[0.12] text-white placeholder-gray-500 focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 outline-none transition text-sm"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-gray-500"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition"
                 >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+              {errors.password && (
+                <p className="text-red-400 text-xs mt-1.5 ml-1">{errors.password}</p>
+              )}
             </div>
 
-            <button
+            {/* Submit Button */}
+            <motion.button
               type="submit"
-              className="py-3 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-xl"
+              disabled={loading}
+              whileHover={{ scale: loading ? 1 : 1.02 }}
+              whileTap={{ scale: loading ? 1 : 0.98 }}
+              className="w-full py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold text-sm shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:from-blue-500 hover:to-indigo-500 transition flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Log In
-            </button>
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  Sign In
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </motion.button>
           </form>
-        </motion.div>
 
-        {/* SOCIAL LOGIN */}
-        <motion.div
-          initial={{ x: 40, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          className="flex flex-col items-center justify-center gap-4"
-        >
-          <h3>Or continue with</h3>
+          {/* Divider */}
+          <div className="flex items-center gap-3 my-6">
+            <div className="flex-1 h-px bg-white/10"></div>
+            <span className="text-xs text-gray-500">NEW HERE?</span>
+            <div className="flex-1 h-px bg-white/10"></div>
+          </div>
 
-          {["Google", "Facebook", "Apple"].map((provider) => (
-            <button
-              key={provider}
-              onClick={() => handleSocialLogin(provider)}
-              className="w-full border rounded-xl py-3"
-            >
-              Continue with {provider}
-            </button>
-          ))}
-        </motion.div>
-      </div>
+          {/* Sign Up Link */}
+          <Link
+            to="/signup"
+            className="w-full py-3 rounded-xl border border-white/[0.12] text-gray-300 font-medium text-sm hover:bg-white/[0.06] hover:text-white transition flex items-center justify-center gap-2"
+          >
+            Create an Account
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        {/* Bottom text */}
+        <p className="text-center text-xs text-gray-600 mt-4">
+          © {new Date().getFullYear()} Interview Companion. All rights reserved.
+        </p>
+      </motion.div>
     </div>
   );
 }
