@@ -1,186 +1,185 @@
+// src/pages/Profile.jsx
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { User, Mail, Edit3, Loader2, FileText, Upload } from "lucide-react";
+import { User, Mail, Loader2, FileText, Layers, LogOut, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { getCurrentUser } from "../services/api";
 
 export default function Profile() {
   const navigate = useNavigate();
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(false);
-  const [about, setAbout] = useState("");
-  const [avatar, setAvatar] = useState("");
-  const [analysisHistory, setAnalysisHistory] = useState([]);
 
-  const storedUser = JSON.parse(sessionStorage.getItem("user"));
-
-  const email = storedUser?.email;
-  const name = storedUser?.name;
-  const photo = storedUser?.photo;
-
-
-  // ✅ Fetch profile + history
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const profileRes = await axios.get(
-          `http://localhost:5000/api/user/profile/${email}`
-        );
-
-        const historyRes = await axios.get(
-          `http://localhost:5000/api/user/history/${email}`
-        );
-
-        setProfile(profileRes.data || {});
-        setAbout(profileRes.data?.about || "");
-        setAvatar(profileRes.data?.avatar || "");
-        setAnalysisHistory(historyRes.data || []);
-      } catch (error) {
-        console.error("API ERROR:", error);
-        setProfile({
-          name: "Guest User",
-          email: email
-        });
-      } finally {
-        setLoading(false); // ✅ ALWAYS stops loader now
-      }
-    };
-
-    fetchData();
-  }, [email]);
-
-
-  // ✅ Save profile updates
-  const handleSave = async () => {
+  // ── Pull stored user from sessionStorage (set by Login / Signup) ────────────
+  const storedUser = (() => {
     try {
-      await axios.post("http://localhost:5000/api/user/profile", {
-        email,
-        name: profile.name,
-        avatar,
-        about,
-      });
-      setEditing(false);
-    } catch (error) {
-      console.error("Error updating profile:", error);
+      return JSON.parse(sessionStorage.getItem("user") || "{}");
+    } catch {
+      return {};
     }
+  })();
+
+  const [user, setUser]       = useState(storedUser);
+  const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState(null);
+
+  // ── Verify session with backend GET /api/auth/me ────────────────────────────
+  useEffect(() => {
+    getCurrentUser()
+      .then((data) => {
+        // Merge fresh data from server (data.user) with stored data
+        setUser((prev) => ({ ...prev, ...data.user }));
+      })
+      .catch((err) => {
+        console.warn("Profile fetch error:", err.message);
+        // If token is invalid, session has expired
+        if (err.message === "Session expired") {
+          setError("Your session has expired. Please log in again.");
+        }
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  // ── Logout ───────────────────────────────────────────────────────────────────
+  const handleLogout = () => {
+    sessionStorage.clear();
+    navigate("/login", { replace: true });
   };
 
-  if (loading || !profile) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="animate-spin text-indigo-500" size={32} />
+        <Loader2 className="animate-spin text-indigo-400" size={36} />
       </div>
     );
   }
 
+  // Derive display values — backend stores username, not name
+  const displayName  = user?.username || user?.name || "User";
+  const displayEmail = user?.email    || "—";
+  const userId       = user?._id;
+
+  // Avatar from DiceBear using username as seed
+  const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(displayName)}&backgroundColor=3b4fd8&textColor=ffffff`;
 
   return (
     <div className="min-h-screen p-6 flex flex-col items-center justify-center">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-3xl bg-black/40 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl p-8"
+        className="w-full max-w-2xl space-y-5"
       >
-        <div className="flex items-center gap-6 mb-6">
-          <img
-            src={
-              avatar ||
-              "https://api.dicebear.com/7.x/initials/svg?seed=" +
-              (profile.name || "User")
-            }
-            alt="Avatar"
-            className="w-24 h-24 rounded-full border-4 border-blue-500/50 shadow-lg"
-          />
-          <div>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-2">
-              <User className="text-blue-400" /> {name || "User"}
-            </h1>
-            <p className="text-gray-300 flex items-center gap-1 mt-1">
-              <Mail className="text-blue-300" size={16} /> {email}
-            </p>
-          </div>
-        </div>
 
-        {/* About Section */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-blue-100 mb-3 flex items-center gap-2">
-            <Edit3 className="text-blue-400" /> About Me
-          </h2>
-          {editing ? (
-            <textarea
-              value={about}
-              onChange={(e) => setAbout(e.target.value)}
-              className="w-full p-3 bg-white/5 border border-white/10 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none text-white placeholder-gray-500"
-              rows={4}
-            />
-          ) : (
-            <p className="text-gray-300 whitespace-pre-line leading-relaxed">
-              {about || "No information provided yet."}
-            </p>
-          )}
-          <div className="mt-4">
-            {editing ? (
-              <button
-                onClick={handleSave}
-                className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition shadow-lg"
-              >
-                Save
-              </button>
-            ) : (
-              <button
-                onClick={() => setEditing(true)}
-                className="px-6 py-2 bg-white/10 text-blue-300 border border-white/10 rounded-lg hover:bg-white/20 transition"
-              >
-                Edit
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Analysis History */}
-        <div>
-          <h2 className="text-xl font-semibold text-blue-100 mb-4 flex items-center gap-2">
-            <FileText className="text-blue-400" /> Resume Analysis History
-          </h2>
-          {analysisHistory.length === 0 ? (
-            <p className="text-gray-500 italic">No analyses yet.</p>
-          ) : (
-            <div className="space-y-4">
-              {analysisHistory.map((a, index) => (
-                <div
-                  key={index}
-                  className="p-4 bg-white/5 border border-white/10 rounded-xl flex justify-between items-center hover:bg-white/10 transition"
-                >
-                  <div>
-                    <p className="font-semibold text-white">
-                      Role: {a.role}
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      Match Score: <span className="text-blue-300">{a.matchScore}%</span> | {new Date(a.date).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <button className="px-4 py-2 bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-lg text-sm hover:bg-blue-500/30 transition">
-                    Download Report
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Change Resume Button */}
-        <div className="mt-10 text-center">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate("/uploadresume")}
-            className="flex items-center justify-center gap-2 mx-auto px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-full shadow-lg hover:shadow-blue-500/40 transition border border-white/10"
+        {/* Error Banner */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="px-5 py-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-sm flex items-center gap-2"
           >
-            <Upload size={18} /> Change Resume
-          </motion.button>
+            <Shield size={16} /> {error}
+            <button
+              onClick={handleLogout}
+              className="ml-auto text-red-400 underline hover:text-red-300 text-xs"
+            >
+              Log in again
+            </button>
+          </motion.div>
+        )}
+
+        {/* Profile Card */}
+        <div className="bg-black/40 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl p-8">
+
+          {/* Avatar + Info */}
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8">
+            <img
+              src={avatarUrl}
+              alt={displayName}
+              className="w-24 h-24 rounded-full border-4 border-indigo-500/40 shadow-lg shrink-0"
+            />
+            <div>
+              <h1 className="text-3xl font-bold text-white flex items-center gap-2">
+                <User size={22} className="text-indigo-400" />
+                {displayName}
+              </h1>
+              <p className="text-gray-300 flex items-center gap-1.5 mt-1.5 text-sm">
+                <Mail size={14} className="text-indigo-300" />
+                {displayEmail}
+              </p>
+              {userId && (
+                <p className="text-gray-600 text-xs mt-1 font-mono">
+                  UID: {userId}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Account Info Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+            <InfoCard label="Username" value={displayName} icon={<User size={14} />} />
+            <InfoCard label="Email" value={displayEmail} icon={<Mail size={14} />} />
+            <InfoCard
+              label="Account Status"
+              value="Active"
+              icon={<Shield size={14} />}
+              accent="text-emerald-400"
+            />
+            <InfoCard
+              label="Session"
+              value="JWT (Bearer Token)"
+              icon={<Shield size={14} />}
+              accent="text-blue-400"
+            />
+          </div>
+
+          {/* Resume analysis history placeholder */}
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold text-blue-100 mb-3 flex items-center gap-2">
+              <FileText size={18} className="text-blue-400" />
+              Resume Analysis History
+            </h2>
+            <div className="p-5 bg-white/5 border border-white/10 rounded-xl text-center">
+              <p className="text-gray-500 italic text-sm">
+                No analyses yet — upload a resume after selecting your role and stack.
+              </p>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => navigate("/dashboard")}
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-blue-500/30 transition border border-white/10 text-sm"
+            >
+              <Layers size={16} />
+              Go to Dashboard
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={handleLogout}
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 font-semibold rounded-xl transition text-sm"
+            >
+              <LogOut size={16} />
+              Logout
+            </motion.button>
+          </div>
         </div>
       </motion.div>
+    </div>
+  );
+}
+
+// ── Reusable info card ────────────────────────────────────────────────────────
+function InfoCard({ label, value, icon, accent = "text-gray-300" }) {
+  return (
+    <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-3">
+      <p className="text-gray-500 text-xs mb-1 flex items-center gap-1.5">
+        <span className="text-gray-600">{icon}</span>
+        {label}
+      </p>
+      <p className={`text-sm font-semibold ${accent}`}>{value}</p>
     </div>
   );
 }
