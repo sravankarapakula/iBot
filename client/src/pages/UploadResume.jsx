@@ -12,94 +12,24 @@ import {
   Heart,
   RotateCcw,
 } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
-import * as pdfjsLib from "pdfjs-dist/build/pdf";
-import pdfjsWorker from "pdfjs-dist/build/pdf.worker.min?url";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { jsPDF } from "jspdf";
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 export default function UploadResume() {
   const navigate = useNavigate();
   const { title: roleTitle } = useParams();
+  const location = useLocation();
+
+  // Stack info passed by StackSelect (may be undefined if navigated directly)
+  const selectedStack = location.state?.stack || null;
 
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState(null);
 
-  // 📄 Extract text from PDF
-  const extractTextFromPDF = async (file) => {
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    let text = "";
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const content = await page.getTextContent();
-      const pageText = content.items.map((s) => s.str).join(" ");
-      text += pageText + "\n";
-    }
-    return text;
-  };
-
-  // 📄 Extract text from DOCX (simple fallback)
-  const extractTextFromDocx = async (file) => {
-    const arrayBuffer = await file.arrayBuffer();
-    const textDecoder = new TextDecoder("utf-8");
-    return textDecoder.decode(arrayBuffer);
-  };
-
   // 📤 When file selected
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
-  };
-
-  // 🧠 Personalized Analysis
-  const generatePersonalizedSuggestions = (role, resumeText) => {
-    const lower = resumeText.toLowerCase();
-    const suggestions = [];
-    let matchScore = 90;
-
-    if (role.toLowerCase().includes("developer")) {
-      if (!lower.includes("react")) {
-        suggestions.push("Add React.js experience to strengthen your frontend profile.");
-        matchScore -= 10;
-      }
-      if (!lower.includes("javascript")) {
-        suggestions.push("Include JavaScript or TypeScript in your skill set.");
-        matchScore -= 10;
-      }
-      if (!lower.includes("project")) {
-        suggestions.push("Showcase key projects demonstrating your coding expertise.");
-        matchScore -= 5;
-      }
-    }
-
-    if (role.toLowerCase().includes("designer")) {
-      if (!lower.includes("figma")) {
-        suggestions.push("Mention design tools such as Figma or Adobe XD.");
-        matchScore -= 10;
-      }
-      if (!lower.includes("portfolio")) {
-        suggestions.push("Add a link to your design portfolio for credibility.");
-        matchScore -= 10;
-      }
-    }
-
-    if (role.toLowerCase().includes("manager")) {
-      if (!lower.includes("lead")) {
-        suggestions.push("Highlight leadership or project management experience.");
-        matchScore -= 10;
-      }
-      if (!lower.includes("communication")) {
-        suggestions.push("Include communication and coordination skills.");
-        matchScore -= 5;
-      }
-    }
-
-    if (suggestions.length === 0)
-      suggestions.push("✅ Excellent! Your resume aligns well with this role.");
-
-    return { suggestions, matchScore: Math.max(matchScore, 40) };
   };
 
   // ⚙️ Handle Resume Upload + Analysis
@@ -112,6 +42,10 @@ export default function UploadResume() {
       const formData = new FormData();
       formData.append("resume", file);
       formData.append("role", roleTitle);
+      if (selectedStack) {
+        formData.append("stackId",   selectedStack.id);
+        formData.append("stackName", selectedStack.name);
+      }
 
       // Call backend API
       const response = await fetch("http://localhost:5000/api/resume/upload", {
@@ -215,8 +149,14 @@ export default function UploadResume() {
           Upload Your Resume
         </h1>
         <p className="text-center text-gray-400 mb-6">
-          Role Selected:{" "}
-          <span className="font-semibold text-blue-400">{roleTitle}</span>
+          Role:{" "}
+          <span className="font-semibold text-blue-400">{decodeURIComponent(roleTitle)}</span>
+          {selectedStack && (
+            <>
+              {" "}&nbsp;·&nbsp;{" "}
+              <span className="font-semibold text-indigo-300">{selectedStack.name}</span>
+            </>
+          )}
         </p>
 
         {!analysis ? (

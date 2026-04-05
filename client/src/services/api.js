@@ -1,5 +1,11 @@
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
+// ── Auth header helper (reads token from sessionStorage, matching Login.jsx) ─
+function getAuthHeader() {
+  const token = sessionStorage.getItem("authToken");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 // Helper to safely parse JSON response
 async function parseResponse(response) {
   const text = await response.text();
@@ -28,7 +34,7 @@ export async function uploadResume(file) {
 export async function generateInterviewQuestions(role, round) {
   const response = await fetch(`${API_BASE}/api/interview/generate`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
     body: JSON.stringify({ role, round }),
   });
 
@@ -74,4 +80,42 @@ export async function registerUser(username, email, password) {
     throw new Error(data.message || "Registration failed");
   }
   return data;
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// ✅ Role-first Selection Flow APIs
+// ────────────────────────────────────────────────────────────────────────────
+
+// GET /api/roles — fetch all predefined roles (public)
+export async function getRoles() {
+  const response = await fetch(`${API_BASE}/api/roles`);
+  if (!response.ok) throw new Error("Failed to fetch roles");
+  return response.json();
+}
+
+// GET /api/roles/:roleId/stacks — fetch stacks for a given role (public)
+export async function getStacksForRole(roleId) {
+  const response = await fetch(`${API_BASE}/api/roles/${roleId}/stacks`);
+  if (!response.ok) throw new Error(`Failed to fetch stacks for role: ${roleId}`);
+  return response.json();
+}
+
+// POST /api/roles/selection — persist a user's role + stack choice (auth)
+export async function saveUserSelection(userId, roleId, stackId, roleName = "", stackName = "") {
+  const response = await fetch(`${API_BASE}/api/roles/selection`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...getAuthHeader() },
+    body: JSON.stringify({ userId, roleId, stackId, roleName, stackName }),
+  });
+  if (!response.ok) throw new Error("Failed to save user selection");
+  return response.json();
+}
+
+// GET /api/auth/me — verify token and get current user from server (auth)
+export async function getCurrentUser() {
+  const response = await fetch(`${API_BASE}/api/auth/me`, {
+    headers: { ...getAuthHeader() },
+  });
+  if (!response.ok) throw new Error("Session expired");
+  return response.json(); // { user: { _id, username, email } }
 }

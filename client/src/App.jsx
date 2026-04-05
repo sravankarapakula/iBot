@@ -25,6 +25,7 @@ import Profile from "./pages/Profile.jsx";
 import TechnicalRound from "./pages/TechnicalRound.jsx";
 import ManagerialRound from "./pages/ManagerialRound.jsx";
 import HRRound from "./pages/HRRound.jsx";
+import StackSelect from "./pages/StackSelect.jsx";
 
 export default function App() {
   const location = useLocation();
@@ -55,6 +56,9 @@ export default function App() {
           {/* 💬 Chat manual page ONLY when user clicks Chat in sidebar */}
           <Route path="/chat" element={<ChatBot />} />
 
+          {/* 💼 Role-First Flow */}
+          <Route path="/stacks/:roleId" element={<StackSelect />} />
+
           {/* 📄 Resume Flow */}
           <Route path="/uploadresume/:title" element={<UploadResume />} />
           <Route path="/resumeanalysis/:roleTitle" element={<ResumeAnalysis />} />
@@ -76,17 +80,31 @@ export default function App() {
   );
 }
 
-/* ======================== IMPORTANT ========================
-WHY YOU WERE REDIRECTED TO CHAT ❌
-------------------------------------------------------------
-1. Your InterviewSession route was missing OR mismatched.
-2. Some buttons were navigating to /chat instead of /interview-session.
-3. Sidebar Chat is separate and should not be used for interview.
+/* ======================== ROUTE MAP ========================
+PUBLIC:
+  /home        → Landing page
+  /login       → Login (PublicRoute — redirects to /dashboard if logged in)
+  /signup      → Signup (PublicRoute — redirects to /dashboard if logged in)
 
-NOW FLOW IS ✅:
-Dashboard → Upload Resume → Resume Analysis →
-Click Technical/Managerial/HR → /interview-session ✅
-AI questions appear there ✅
+PROTECTED (requires sessionStorage authToken):
+  /dashboard                     → Role selection grid (Layer 1)
+  /stacks/:roleId                → Stack selection for role (Layer 2)
+  /uploadresume/:title           → Resume upload + AI analysis
+  /resumeanalysis/:roleTitle     → Resume analysis results
+  /interview-session/:roundType  → AI mock interview (Technical/Managerial/HR)
+  /technical                     → Technical round intro
+  /managerial                    → Managerial round intro
+  /hr                            → HR round intro
+  /profile                       → User profile (reads from sessionStorage + /api/auth/me)
+  /chat                          → Free AI chat
 
-Chat page is ONLY for free chat.
-============================================================== */
+AUTH FLOW:
+  Login/Signup → stores authToken, refreshToken, user in sessionStorage
+  ProtectedRoute checks sessionStorage.authToken
+  PublicRoute blocks logged-in users from login/signup
+  Logout clears sessionStorage → navigate /login
+
+NEW ROLE-FIRST FLOW ✅:
+  /dashboard (pick role) → /stacks/:roleId (pick stack) →
+  /uploadresume/:title (upload + analysis) → /interview-session/:round
+============================================================== */
