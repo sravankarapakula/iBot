@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { ROLES as PREDEFINED_ROLES } from "../constants/rolesData.js";
 import InfoModal from "../components/InfoModal.jsx";
+import { DottedSurface } from "@/components/ui/dotted-surface";
 
 // ── Category colour map ──────────────────────────────────────────────────────
 const CATEGORY_COLORS = {
@@ -122,13 +123,14 @@ export default function Dashboard() {
   }, {});
 
   return (
-    <div className="min-h-screen flex flex-col items-center py-14 px-4 sm:px-8">
+    <div className="min-h-screen flex flex-col items-center py-14 px-4 sm:px-8 relative bg-transparent z-0">
+      <DottedSurface />
 
       {/* ── Header ── */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-10"
+        className="text-center mb-10 relative z-10"
       >
         <div className="flex items-center justify-center gap-3 mb-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
@@ -138,7 +140,7 @@ export default function Dashboard() {
             Choose Your Role
           </h1>
         </div>
-        <p className="text-gray-400 text-sm max-w-md mx-auto">
+        <p className="text-gray-200 text-sm max-w-md mx-auto">
           Select the role you're targeting. We'll tailor your interview prep, resume analysis and recommendations around it.
         </p>
 
@@ -171,7 +173,7 @@ export default function Dashboard() {
           placeholder="Search roles or categories…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-11 pr-4 py-3 rounded-2xl border border-white/10 focus:ring-2 focus:ring-blue-500/60 outline-none text-white shadow-lg bg-white/5 backdrop-blur-md placeholder-gray-500 transition-all text-sm"
+          className="w-full pl-11 pr-4 py-3 rounded-2xl border border-white/10 focus:ring-2 focus:ring-blue-500/60 outline-none text-white shadow-lg bg-white/5 backdrop-blur-md placeholder-gray-300 transition-all text-sm"
         />
       </div>
 
@@ -420,12 +422,12 @@ function RoleTile({ role, index, catStyle, onClick, onInfo }) {
         group cursor-pointer relative overflow-hidden
         flex flex-col gap-2
         min-h-[168px] p-5 rounded-[18px]
-        bg-gradient-to-br ${role.color}
-        border border-white/[0.08]
-        shadow-[0_4px_24px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.06)]
-        hover:shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.10)]
-        hover:border-white/[0.18]
-        backdrop-blur-[11px]
+        bg-slate-800/40
+        border border-white/20
+        shadow-[0_10px_30px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.1)]
+        hover:shadow-[0_10px_40px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.2)]
+        hover:border-white/40
+        backdrop-blur-xl
         transition-all duration-[250ms] ease-out
       `}
     >
@@ -470,13 +472,13 @@ function RoleTile({ role, index, catStyle, onClick, onInfo }) {
       </div>
 
       {/* ── DESCRIPTION ── */}
-      <p className="text-gray-400/80 text-[11px] leading-relaxed pl-3 line-clamp-2">
+      <p className="text-gray-200 text-[12px] leading-relaxed pl-3 line-clamp-2">
         {role.shortDescription}
       </p>
 
       {/* ── FOOTER: role ID badge ── */}
       <div className="mt-auto pl-3">
-        <span className="inline-flex items-center gap-1 text-[9px] font-bold text-white/30 uppercase tracking-widest">
+        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-white/50 uppercase tracking-widest">
           {role.id}
         </span>
       </div>

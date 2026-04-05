@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { DottedSurface } from "@/components/ui/dotted-surface";
 
 export default function ChatBot() {
   const [messages, setMessages] = useState([
@@ -54,13 +55,14 @@ export default function ChatBot() {
   };
 
   return (
-    <div className="flex justify-center items-center h-full p-4">
-      <div className="max-w-md w-full rounded-2xl shadow-2xl p-6 bg-black/40 backdrop-blur-xl border border-white/10 h-[80vh] flex flex-col">
+    <div className="flex justify-center items-center h-full min-h-[calc(100vh-80px)] p-4 relative z-0">
+      <DottedSurface />
+      <div className="max-w-5xl w-full rounded-none shadow-[0_20px_60px_rgba(0,0,0,0.4)] p-6 bg-transparent backdrop-blur-sm border border-white/10 h-[85vh] flex flex-col relative z-10">
 
         {/* Header */}
         <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-4">
           <h2 className="font-semibold text-lg text-white flex items-center gap-2">
-            🤖 AI ChatBot Interface
+            🤖 iBOT
           </h2>
         </div>
 
