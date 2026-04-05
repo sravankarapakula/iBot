@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { User, Mail, Loader2, FileText, Layers, LogOut, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUser } from "../services/api";
+import { DottedSurface } from "@/components/ui/dotted-surface";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -61,11 +62,12 @@ export default function Profile() {
   const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(displayName)}&backgroundColor=3b4fd8&textColor=ffffff`;
 
   return (
-    <div className="min-h-screen p-6 flex flex-col items-center justify-center">
+    <div className="min-h-screen p-6 flex flex-col items-center justify-center relative z-0 bg-transparent">
+      <DottedSurface />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-2xl space-y-5"
+        className="w-full max-w-2xl space-y-5 relative z-10"
       >
 
         {/* Error Banner */}
@@ -86,7 +88,7 @@ export default function Profile() {
         )}
 
         {/* Profile Card */}
-        <div className="bg-black/40 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl p-8">
+        <div className="bg-black/60 backdrop-blur-2xl border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-2xl p-8">
 
           {/* Avatar + Info */}
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8">
