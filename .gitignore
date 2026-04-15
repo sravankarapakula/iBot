@@ -19,3 +19,4 @@ client/.env
 Thumbs.db
 
 interview_env
+__pycache__
