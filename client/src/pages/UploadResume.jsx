@@ -11,6 +11,7 @@ import {
   Briefcase,
   Heart,
   RotateCcw,
+  Video,
 } from "lucide-react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { jsPDF } from "jspdf";
@@ -256,23 +257,36 @@ export default function UploadResume() {
             </div>
 
             <div className="flex justify-center mt-6 gap-3 flex-wrap">
+              {/* ✅ Fixed: navigate to real interview session, not static intro pages */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
-                onClick={() => navigate("/technical")}
+                onClick={() =>
+                  navigate("/interview-session/technical", {
+                    state: { role: roleTitle, resumeText: analysis.resumeText, round: "technical" },
+                  })
+                }
                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600/80 text-white hover:bg-blue-600"
               >
                 <Brain size={18} /> Technical
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
-                onClick={() => navigate("/managerial")}
+                onClick={() =>
+                  navigate("/interview-session/managerial", {
+                    state: { role: roleTitle, resumeText: analysis.resumeText, round: "managerial" },
+                  })
+                }
                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600/80 text-white hover:bg-indigo-600"
               >
                 <Briefcase size={18} /> Managerial
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
-                onClick={() => navigate("/hr")}
+                onClick={() =>
+                  navigate("/interview-session/hr", {
+                    state: { role: roleTitle, resumeText: analysis.resumeText, round: "hr" },
+                  })
+                }
                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-pink-600/80 text-white hover:bg-pink-600"
               >
                 <Heart size={18} /> HR
@@ -286,12 +300,31 @@ export default function UploadResume() {
                   state: {
                     role: roleTitle,
                     resumeText: analysis.resumeText,
+                    round: "technical",
                   },
                 })
               }
               className="mt-6 w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition"
             >
-              🚀 Start AI Interview
+              🚀 Start AI Interview (Text)
+            </motion.button>
+
+            {/* ── NEW: AV Interview CTA ── */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() =>
+                navigate("/interview-av", {
+                  state: {
+                    role: roleTitle,
+                    stack: selectedStack,
+                    resumeText: analysis.resumeText,
+                  },
+                })
+              }
+              className="mt-3 w-full bg-gradient-to-r from-violet-600 to-pink-500 text-white py-3 rounded-xl font-bold shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 transition flex items-center justify-center gap-2"
+            >
+              <Video size={18} /> 🎥 Start Video Interview
             </motion.button>
           </motion.div>
 

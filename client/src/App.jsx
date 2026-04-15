@@ -26,6 +26,7 @@ import TechnicalRound from "./pages/TechnicalRound.jsx";
 import ManagerialRound from "./pages/ManagerialRound.jsx";
 import HRRound from "./pages/HRRound.jsx";
 import StackSelect from "./pages/StackSelect.jsx";
+import InterviewAV from "./pages/InterviewAV.jsx";
 
 export default function App() {
   const location = useLocation();
@@ -68,6 +69,7 @@ export default function App() {
              ResumeAnalysis buttons MUST navigate to this route
           ===================================================== */
           <Route path="/interview-session/:roundType" element={<InterviewSession />} />
+          <Route path="/interview-av" element={<InterviewAV />} />
 
 
           {/* ❌ These are static intro pages only */}

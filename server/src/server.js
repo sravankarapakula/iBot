@@ -14,6 +14,7 @@ import interviewRoutes from "./routes/interviewRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import resumeRoutes from "./routes/resumeRoutes.js";
 import roleRoutes from "./routes/roleRoutes.js";
+import avRoutes   from "./routes/avRoutes.js";
 
 // CONNECT DB
 connectDB();
@@ -100,6 +101,7 @@ app.use("/api/interview", interviewRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/resume", resumeRoutes);
 app.use("/api/roles", roleRoutes);
+app.use("/api/av",    avRoutes);
 
 // ================== DB TEST ==================
 app.post("/api/testdb", async (req, res) => {
