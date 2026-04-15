@@ -1,0 +1,15 @@
+{
+  "vision": {
+    "confidence": 90.95,
+    "fidgeting": 0.0,
+    "looking_away": 0.0,
+    "smiling": 4.29,
+    "cheating": 0.0
+  },
+  "audio": {
+    "duration": 8.86,
+    "wpm": 33.86,
+    "fillers": 0
+  },
+  "transcript": "Hello, my name is Starron."
+}

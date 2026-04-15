@@ -17,3 +17,5 @@ client/.env
 # OS/system files
 .DS_Store
 Thumbs.db
+
+interview_env
