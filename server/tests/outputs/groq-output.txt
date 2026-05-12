@@ -1,0 +1,34 @@
+Testing Groq API...
+❌ Groq Error: AuthenticationError: 401 Invalid API Key
+    at APIError.generate (file:///c:/Users/mohit/OneDrive/Desktop/ganeshwebdev/AI-Interview-Bot/server/node_modules/openai/error.mjs:44:20)
+    at OpenAI.makeStatusError (file:///c:/Users/mohit/OneDrive/Desktop/ganeshwebdev/AI-Interview-Bot/server/node_modules/openai/core.mjs:295:25)
+    at OpenAI.makeRequest (file:///c:/Users/mohit/OneDrive/Desktop/ganeshwebdev/AI-Interview-Bot/server/node_modules/openai/core.mjs:339:30)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async testGroq (file:///c:/Users/mohit/OneDrive/Desktop/ganeshwebdev/AI-Interview-Bot/server/test-groq.js:21:28) {
+  status: 401,
+  headers: {
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cache-control': 'private, max-age=0, no-store, no-cache, must-revalidate',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '9a3762e3f9e3b108-MAA',
+    connection: 'keep-alive',
+    'content-length': '96',
+    'content-type': 'application/json',
+    date: 'Mon, 24 Nov 2025 08:02:49 GMT',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=FqEn5jZ5LqW8gqYRey5.gNE78gjaVF8lU7YjN4jVF5E-1763971369.5951085-1.0.1.1-docPFu3IwfE7juy09xzLlt_BgCONQhcakzzg2NpnghCDcqVvM2xsrcl5spKLD_PQj5CUFeNSa5R3Uk1VPwGW8W_UnPycHmYjOEv5b0In40CMZ.Bv.fYyoXfjOO9KwwL9; HttpOnly; Secure; Path=/; Domain=groq.com; Expires=Mon, 24 Nov 2025 08:32:49 GMT',
+    vary: 'Origin',
+    via: '1.1 google',
+    'x-groq-region': 'bom',
+    'x-request-id': 'req_01kate62mre8e8az81zfdq56qn'
+  },
+  request_id: 'req_01kate62mre8e8az81zfdq56qn',
+  error: {
+    message: 'Invalid API Key',
+    type: 'invalid_request_error',
+    code: 'invalid_api_key'
+  },
+  code: 'invalid_api_key',
+  param: undefined,
+  type: 'invalid_request_error'
+}
